@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@300;900&display=swap" rel="stylesheet">
+    <title>Kees</title>
+    <style>
+        body {
+            background-image: url("https://i.imgur.com/p6S4c2H.jpeg");
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: "Red Hat Display", sans-serif;
+            font-optical-sizing: auto;
+            font-style: normal;
+            text-shadow: #000 1px 0 10px;
+            background-color: black;
+            margin: 0;
+            font-size: 100px;
+            transition: background-color 0.5s ease-in-out;
+        }
+
+        @media (max-width: 1000px) {
+            body {
+                font-size: 50px;
+            }
+        }
+
+        @media (max-width: 700px) {
+            body {
+                font-size: 40px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            body {
+                font-size: 30px;
+            }
+        }
+
+        #timer {
+            padding: 20px;
+            font-weight: bold;
+            color: #fff;
+            position: absolute;
+            top: 70vh;
+        }
+    </style>
+</head>
+<body>
+<div id="timer">
+    <span id="countdown"></span>
+</div>
+
+<script>
+    function countdown() {
+        function getNextCountdownDates() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const firstCountdownDate = new Date(`May 28, ${currentYear} 18:00:00`).getTime();
+            const resetTime = new Date(`May 29, ${currentYear} 00:00:00`).getTime();
+
+            if (now.getTime() > resetTime) {
+                const nextYear = currentYear + 1;
+                const secondCountdownDate = new Date(`May 28, ${nextYear} 18:00:00`).getTime();
+                return { firstCountdownDate: secondCountdownDate, resetTime: resetTime + (365 * 24 * 60 * 60 * 1000) };
+            }
+
+            const secondCountdownDate = new Date(`May 28, ${currentYear + 1} 18:00:00`).getTime();
+            return { firstCountdownDate, resetTime, secondCountdownDate };
+        }
+
+        function updateCountdown(targetDate, nextResetTime) {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            document.getElementById("countdown").innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+
+            if (now >= nextResetTime) {
+                clearInterval(x);
+                document.getElementById("countdown").innerHTML = "0d 0h 0m 0s";
+                const { firstCountdownDate, resetTime, secondCountdownDate } = getNextCountdownDates();
+                setTimeout(() => startCountdown(secondCountdownDate, resetTime), nextResetTime - now);
+            } else if (distance < 0) {
+                startCountdown(nextResetTime, nextResetTime);
+            }
+        }
+
+        function startCountdown(targetDate, nextResetTime) {
+            updateCountdown(targetDate, nextResetTime);
+            x = setInterval(function() {
+                updateCountdown(targetDate, nextResetTime);
+            }, 1000);
+        }
+
+        function startFlashingBackground() {
+            document.body.style.backgroundImage = 'none';
+            let flashState = false;
+            flashInterval = setInterval(() => {
+                document.body.style.backgroundColor = flashState ? 'white' : 'red';
+                flashState = !flashState;
+            }, 500);
+        }
+
+        function stopFlashingBackground() {
+            clearInterval(flashInterval);
+            document.body.style.backgroundImage = 'url("https://i.imgur.com/p6S4c2H.jpeg")';
+            document.body.style.backgroundColor = 'black';
+        }
+
+        let x;
+        let flashInterval;
+        const { firstCountdownDate, resetTime, secondCountdownDate } = getNextCountdownDates();
+        startCountdown(firstCountdownDate, resetTime);
+
+        const now = new Date().getTime();
+        if (now >= firstCountdownDate && now <= resetTime) {
+            startFlashingBackground();
+            setTimeout(stopFlashingBackground, resetTime - now);
+        }
+    }
+
+    window.onload = countdown;
+</script>
+
+</body>
+</html>
